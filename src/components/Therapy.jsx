@@ -1,7 +1,9 @@
 import React, { useState, useRef } from 'react';
-import { CheckCircle, ArrowRight, Camera, X } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { CheckCircle, ArrowRight, Camera, X, PencilLine } from 'lucide-react';
 
 const Therapy = ({ completedTasks = [], setCompletedTasks }) => {
+  const navigate = useNavigate();
   const [justCompletedIndex, setJustCompletedIndex] = useState(null);
   const [activeGestureTask, setActiveGestureTask] = useState(false);
   const [gesturePhase, setGesturePhase] = useState('idle'); // idle, checking, success
@@ -11,7 +13,7 @@ const Therapy = ({ completedTasks = [], setCompletedTasks }) => {
 
   const THERAPY_TASKS = [
     { name: "Vocal Exercises", duration: "15 min", color: "bg-blue-100 text-blue-800", interactive: false },
-    { name: "Motor Skills Game", duration: "20 min", color: "bg-amber-100 text-amber-800", interactive: false },
+    { name: "Screen Draw Game", duration: "20 min", color: "bg-amber-100 text-amber-800", interactive: false , route: "/draw-game" },
     { name: "Breathing Flow", duration: "10 min", color: "bg-green-100 text-green-800", interactive: false },
     { name: "Hand Gesture Task", duration: "5 min", color: "bg-purple-100 text-purple-800", interactive: true },
   ];
@@ -54,23 +56,32 @@ const Therapy = ({ completedTasks = [], setCompletedTasks }) => {
   };
 
   const handleTaskClick = (index) => {
-    if (THERAPY_TASKS[index].interactive && !completedTasks.includes(index)) {
-      setActiveGestureTask(index);
-      setGesturePhase('idle');
-      setTimeout(() => startCamera(), 100);
-      return;
-    }
+  const task = THERAPY_TASKS[index];
 
-    setCompletedTasks(prev => {
-      if (prev.includes(index)) {
-        return prev.filter(i => i !== index);
-      } else {
-        setJustCompletedIndex(index);
-        setTimeout(() => setJustCompletedIndex(null), 3000);
-        return [...prev, index];
-      }
-    });
-  };
+  // ✅ NEW: redirect to Draw Game
+  if (task.route) {
+    navigate(task.route);
+    return;
+  }
+
+  // Existing logic (DO NOT TOUCH)
+  if (task.interactive && !completedTasks.includes(index)) {
+    setActiveGestureTask(index);
+    setGesturePhase('idle');
+    setTimeout(() => startCamera(), 100);
+    return;
+  }
+
+  setCompletedTasks(prev => {
+    if (prev.includes(index)) {
+      return prev.filter(i => i !== index);
+    } else {
+      setJustCompletedIndex(index);
+      setTimeout(() => setJustCompletedIndex(null), 3000);
+      return [...prev, index];
+    }
+  });
+};
 
   return (
     <div className="p-6 md:p-12 max-w-7xl mx-auto animate-in fade-in duration-1000">
